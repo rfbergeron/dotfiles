@@ -45,6 +45,10 @@ if [ -f "$config_dir"/python/startup.py ]; then
 	cp "$config_dir"/python/startup.py ./
 fi
 
+if [ -f "$config_dir"/maven/settings.xml ]; then
+	cp "$config_dir"/maven/settings.xml ./maven/settings.xml
+fi
+
 if [ -d "$config_dir"/nvim ]; then
 	cp -r "$config_dir"/nvim/. ./vim/
 	if [ -e ./vim/pack ]; then rm ./vim/pack; fi

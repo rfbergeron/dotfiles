@@ -55,6 +55,10 @@ else
 		# yarn needs a file to be here, even if it is empty
 		touch "$config_dir"/yarn/config
 	fi
+	if command -v mvn >/dev/null 2>&1; then
+		mkdir -p "$config_dir"/maven
+		cp ./maven/settings.xml "$config_dir"/maven/
+	fi
 fi
 
 if [ -d "$HOME"/.local ]; then
@@ -66,71 +70,47 @@ fi
 if command -v nvim >/dev/null 2>&1; then
 	mkdir -p "$config_dir"/nvim
 	cp -r ./vim/. "$config_dir"/nvim/
-	mkdir -p "$data_dir"/nvim/site/pack/
+	nvim_packs="$data_dir"/nvim/site/pack
+	mkdir -p "$nvim_packs"
 	# make directories for undo, swap, and backup files
 	mkdir -p "$state_dir"/nvim/undo "$state_dir"/nvim/backup "$state_dir"/nvim/swap
 	# set permissions separately in case the directories already existed
 	chmod 0700 "$state_dir"/nvim/undo "$state_dir"/nvim/backup "$state_dir"/nvim/swap
+	# make package directories
+	treesitter_dir="$nvim_packs/treesitter/start"
+	plugin_dir="$nvim_packs/plugins/start"
+	lsp_dir="$nvim_packs/lsp/start"
+	mkdir -p "$treesitter_dir" "$plugin_dir" "$lsp_dir"
 
-	# install/update lsp packages
-	(
-		mkdir -p "$data_dir"/nvim/site/pack/lsp/start
-		cd "$data_dir"/nvim/site/pack/lsp/start || exit 1
-		while read -r lsp_url; do
-			lsp_dir=$(basename -s .git "$lsp_url")
-			if [ -d "$lsp_dir" ]; then
-				(
-					cd "$lsp_dir" || exit 1
-					git pull
-				)
-			else git clone "$lsp_url"; fi
-		done <<EOF
-https://github.com/hrsh7th/cmp-nvim-lsp.git
-https://github.com/saadparwaiz1/cmp_luasnip.git
-https://github.com/VonHeikemen/lsp-zero.nvim.git
-https://github.com/L3MON4D3/LuaSnip.git
-https://github.com/Bilal2453/luvit-meta.git
-https://github.com/hrsh7th/nvim-cmp.git
-https://github.com/neovim/nvim-lspconfig.git
-EOF
-	)
-	# install plugins
-	(
-		mkdir -p "$data_dir"/nvim/site/pack/plugins/start
-		cd "$data_dir"/nvim/site/pack/plugins/start || exit 1
-		while read -r plugin_url; do
-			plugin_dir=$(basename -s .git "$plugin_url")
-			if [ -d "$plugin_dir" ]; then
-				(
-					cd "$plugin_dir" || exit 1
-					git pull
-				)
-			else git clone "$plugin_url"; fi
-		done <<EOF
-https://github.com/lukas-reineke/indent-blankline.nvim.git
-https://github.com/echasnovski/mini.nvim.git
-https://github.com/kylechui/nvim-surround.git
-https://github.com/mbbill/undotree.git
-https://github.com/tpope/vim-sleuth.git
-EOF
-	)
-	# install treesitter
-	(
-		mkdir -p "$data_dir"/nvim/site/pack/treesitter/start
-		cd "$data_dir"/nvim/site/pack/treesitter/start || exit 1
-		while read -r tsit_url; do
-			tsit_dir=$(basename -s .git "$tsit_url")
-			if [ -d "$tsit_dir" ]; then
-				(
-					cd "$tsit_dir" || exit 1
-					git pull
-				)
-			else git clone --branch=main "$tsit_url"; fi
-		done <<EOF
-https://github.com/nvim-treesitter/nvim-treesitter.git
-https://github.com/nvim-treesitter/nvim-treesitter-textobjects.git
-EOF
-	)
+	# install packages
+	while read -r arguments; do
+		install_path=$(echo "$arguments" | cut -d' ' -f1)
+		repo_url=$(echo "$arguments" | cut -d' ' -f2)
+		clone_dir=$(echo "$arguments" | cut -d' ' -f3)
+		branch="$(echo "$arguments" | cut -d' ' -f4)"
+		full_path="$install_path/$clone_dir"
+
+		if [ -d "$full_path" ]; then
+			git -C "$full_path" status
+		elif [ -n "$branch" ]; then
+			git clone --branch="$branch" "$repo_url" "$full_path"
+		else
+			git clone "$repo_url" "$full_path"
+		fi
+	done <<-EOF
+		$lsp_dir htts://github.com/hrsh7th/cm-nvim-lsp.git cmp-lsp
+		$lsp_dir https://github.com/saadparwaiz1/cmp_luasnip.git cmp-luasnip
+		$lsp_dir https://github.com/VonHeikemen/lsp-zero.nvim.git lsp-zero
+		$lsp_dir https://github.com/L3MON4D3/LuaSnip.git luasnip
+		$lsp_dir https://github.com/Bilal2453/luvit-meta.git luvit-meta
+		$lsp_dir https://github.com/hrsh7th/nvim-cmp.git cmp
+		$lsp_dir https://github.com/neovim/nvim-lspconfig.git lspconfig v2.3.0
+		$plugin_dir https://github.com/lukas-reineke/indent-blankline.nvim.git indent-blankline v3.9.0
+		$plugin_dir https://github.com/echasnovski/mini.nvim.git mini v0.16.0
+		$plugin_dir https://github.com/mbbill/undotree.git undotree rel_6.1
+		$treesitter_dir https://github.com/nvim-treesitter/nvim-treesitter.git treesitter main v0.10.0
+		$treesitter_dir https://github.com/nvim-treesitter/nvim-treesitter-textobjects.git treesitter-textobjects main
+	EOF
 else
 	echo "Unable to locate neovim executable; skipping package installation."
 fi

@@ -1,4 +1,5 @@
 # shellcheck shell=sh
+# shellcheck disable=SC1091,SC1090
 
 # editor
 if command -v nvim >/dev/null 2>&1; then
@@ -20,7 +21,7 @@ elif command -v vi >/dev/null 2>&1; then
 fi
 
 # rcfile for bourne shell/posix sh
-if [ -r "$HOME"/.shrc ]; then
+if [ -f "$HOME"/.shrc ]; then
 	export ENV="$HOME"/.shrc
 fi
 
@@ -64,6 +65,18 @@ elif [ -d "$HOME"/.bin ]; then
 	pathmunge "$HOME"/.bin
 fi
 
+# default GOPATH
+if [ -d "$HOME"/go ]; then
+	pathmunge "$HOME"/go
+fi
+
+# default CARGO_HOME
+if [ -f "$HOME"/.cargo/env ]; then
+	. "$HOME"/.cargo/env
+elif [ -d "$HOME"/.cargo ]; then
+	pathmunge "$HOME"/.cargo/bin
+fi
+
 # source systemd environment variables; remote sessions seem to not inherit
 # environment variables generated for the systemd user instance. taken from here:
 # https://unix.stackexchange.com/questions/79064/how-to-export-variables-from-a-file
@@ -71,13 +84,13 @@ if [ -d "${XDG_CONFIG_HOME:-$HOME/.config}"/environment.d/ ]; then
 	set -a
 	for environment in "${XDG_CONFIG_HOME:-$HOME/.config}"/environment.d/*.conf; do
 		# shellcheck disable=SC1090
-		[ -r "$environment" ] && . "$environment"
+		[ -f "$environment" ] && . "$environment"
 	done
 	set +a
 fi
 
 # no point in executing the rest of the file if we can't use xdg dirs
-if [ -z "$HOME" ] || ! [ -w "$HOME" ] || [ -z "${REMOVE_CLUTTER+x}" ]; then
+if [ -z "${REMOVE_CLUTTER+x}" ]; then
 	unset -v grep
 	unset -f pathmunge
 	return
@@ -108,20 +121,9 @@ export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 "$mkdir" -p "$XDG_STATE_HOME"
 
 # readline
-if [ -r "$XDG_CONFIG_HOME"/readline/inputrc ]; then
+if [ -f "$XDG_CONFIG_HOME"/readline/inputrc ]; then
 	export INPUTRC="$XDG_CONFIG_HOME"/readline/inputrc
 fi
-#case "${REALTERM:-$TERM}" in
-#  xterm*) if [ -r "$XDG_CONFIG_HOME"/readline/inputrc-xterm ]; then
-#      export INPUTRC="$XDG_CONFIG_HOME"/readline/inputrc-xterm
-#  fi ;;
-#  linux*) if [ -r "$XDG_CONFIG_HOME"/readline/inputrc-vconsole ]; then
-#      export INPUTRC="$XDG_CONFIG_HOME"/readline/inputrc-vconsole
-#  fi ;;
-#  *) if [ -r "$XDG_CONFIG_HOME"/readline/inputrc ]; then
-#      export INPUTRC="$XDG_CONFIG_HOME"/readline/inputrc
-#  fi ;;
-#esac
 
 # less
 export LESSKEY="$XDG_CONFIG_HOME"/less/lesskey
@@ -157,7 +159,16 @@ fi
 # rust packages
 if command -v cargo >/dev/null 2>&1; then
 	export CARGO_HOME="$XDG_DATA_HOME"/cargo
-	pathmunge "$CARGO_HOME"/bin
+	if [ -f "$CARGO_HOME"/env ]; then
+		. "$CARGO_HOME"/env
+	else
+		pathmunge "$CARGO_HOME"/bin
+	fi
+fi
+
+# rustup
+if command -v rustup >/dev/null 2>&1; then
+	export RUSTUP_HOME="$XDG_DATA_HOME"/rustup
 fi
 
 # golang packages
@@ -183,6 +194,11 @@ if command -v yarn >/dev/null 2>&1; then
 	# config cannot be set with an envvar so it is done as an alias
 fi
 
+# gradle
+if command -v gradle >/dev/null 2>&1; then
+	export GRADLE_USER_HOME="$XDG_DATA_HOME"/gradle
+fi
+
 # texlive/texmf
 if command -v mf >/dev/null 2>&1; then
 	export TEXMFHOME="$XDG_DATA_HOME"/texmf
@@ -206,9 +222,21 @@ if command -v wine >/dev/null 2>&1; then
 	"$mkdir" -p "$WINEPREFIX"
 fi
 
+# parallel
+if command -v parallel >/dev/null 2>&1; then
+	export PARALLEL_HOME="$XDG_CONFIG_HOME"/parallel
+fi
+
 # elinks
 if command -v elinks >/dev/null 2>&1; then
 	export ELINKS_CONFDIR="$XDG_CONFIG_HOME"/elinks
+fi
+
+# w3m
+if command -v w3m >/dev/null 2>&1; then
+	# TODO: some of these files belong in `$XDG_STATE_HOME` or
+	# `$XDG_DATA_HOME`
+	export W3M_DIR="$XDG_CONFIG_HOME"/w3m
 fi
 
 unset -v grep mkdir

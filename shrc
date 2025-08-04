@@ -21,6 +21,11 @@ if [ -n "$XDG_CONFIG_HOME" ] && command -v yarn >/dev/null 2>&1; then
 	alias yarn='yarn --use-yarnrc "$XDG_CONFIG_HOME"/yarn/config'
 fi
 
+# as above, but the configuration file contains more changes
+if [ -n "$XDG_CACHE_HOME" ] && command -v mvn >/dev/null 2>&1; then
+	alias mvn='mvn -gs $XDG_CONFIG_HOME/maven/settings.xml'
+fi
+
 # color and conveniences
 alias ls='ls -h --color=auto'
 alias grep='grep --color=auto'
