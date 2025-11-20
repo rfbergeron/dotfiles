@@ -13,34 +13,34 @@ fi
 BOLDRED='\[\e[1;31m\]'
 # this is bright white, not dark white
 BOLDWHITE='\[\e[1;97m\]'
+# shellcheck disable=SC2034
 WHITE='\[\e[0;97m\]'
 # this is bright black, not dark black
 BOLDBLACK='\[\e[1;90m\]'
+# shellcheck disable=SC2034
 BLACK='\[\e[0;90m\]'
 NC='\[\e[0m\]'
+
+if [[ $LIGHT_BG -gt 0 ]]; then
+	ACCENTCOLOR=$BOLDBLACK
+else
+	ACCENTCOLOR=$BOLDWHITE
+fi
 
 # set the prompt
 prompt() {
 	local LAST_STATUS=$?
-	local STATUS_COLOR
-	local PROMPT_COLOR
-	STATUS_COLOR=$(if [[ $LAST_STATUS -gt 0 ]]; then
-		echo -e "$BOLDRED"
-	elif [[ $LIGHT_BG -gt 0 ]]; then
-		echo -e "$BOLDBLACK"
+	if [[ $LAST_STATUS -gt 0 ]]; then
+		local STATUS_COLOR="$BOLDRED"
 	else
-		echo -e "$BOLDWHITE"
-	fi)
-	PROMPT_COLOR=$(if [[ $LIGHT_BG -gt 0 ]]; then
-		echo -e "$BLACK"
-	else
-		echo -e "$WHITE"
-	fi)
-	if [[ -n $SSH_TTY ]]; then
-		local USER_AND_HOST="$NC\u$PROMPT_COLOR@$NC\h "
+		local STATUS_COLOR="$ACCENTCOLOR"
+	fi
+
+	if [[ -n $SSH_TTY || $FULLPROMPT -gt 0 ]]; then
+		local USER_AND_HOST="$NC\u$ACCENTCOLOR@$NC\h"
 	fi
 	PS1="$USER_AND_HOST$STATUS_COLOR\$ $NC"
-	PS2="$PROMPT_COLOR>$NC "
+	PS2="$ACCENTCOLOR>$NC "
 	PS4="$NC+ "
 }
 

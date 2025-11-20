@@ -50,9 +50,5 @@ if [ -f "$config_dir"/maven/settings.xml ]; then
 fi
 
 if [ -d "$config_dir"/nvim ]; then
-	cp -r "$config_dir"/nvim/. ./vim/
-	if [ -e ./vim/pack ]; then rm ./vim/pack; fi
-elif [ -d "$HOME"/.vim ]; then
-	cp -r "$HOME"/.vim/. ./vim/
-	rm -rf ./vim/pack
+	cp "$config_dir"/nvim/init.lua ./nvim/
 fi

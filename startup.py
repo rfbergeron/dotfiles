@@ -21,7 +21,4 @@ try:
 except IOError:
     pass
 
-sys.ps1 = "<~~ "
-sys.ps2 = "~~~ "
-
 atexit.register(readline.write_history_file, history)

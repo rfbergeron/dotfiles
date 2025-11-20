@@ -69,7 +69,7 @@ fi
 
 if command -v nvim >/dev/null 2>&1; then
 	mkdir -p "$config_dir"/nvim
-	cp -r ./vim/. "$config_dir"/nvim/
+	cp ./nvim/init.lua "$config_dir"/nvim/
 	nvim_packs="$data_dir"/nvim/site/pack
 	mkdir -p "$nvim_packs"
 	# make directories for undo, swap, and backup files
@@ -105,10 +105,11 @@ if command -v nvim >/dev/null 2>&1; then
 		$lsp_dir https://github.com/Bilal2453/luvit-meta.git luvit-meta
 		$lsp_dir https://github.com/hrsh7th/nvim-cmp.git cmp
 		$lsp_dir https://github.com/neovim/nvim-lspconfig.git lspconfig v2.3.0
+		$lsp_dir https://github.com/b0o/SchemaStore.nvim.git schemastore
 		$plugin_dir https://github.com/lukas-reineke/indent-blankline.nvim.git indent-blankline v3.9.0
 		$plugin_dir https://github.com/echasnovski/mini.nvim.git mini v0.16.0
 		$plugin_dir https://github.com/mbbill/undotree.git undotree rel_6.1
-		$treesitter_dir https://github.com/nvim-treesitter/nvim-treesitter.git treesitter main v0.10.0
+		$treesitter_dir https://github.com/nvim-treesitter/nvim-treesitter.git treesitter main
 		$treesitter_dir https://github.com/nvim-treesitter/nvim-treesitter-textobjects.git treesitter-textobjects main
 	EOF
 else

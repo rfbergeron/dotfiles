@@ -83,7 +83,6 @@ fi
 if [ -d "${XDG_CONFIG_HOME:-$HOME/.config}"/environment.d/ ]; then
 	set -a
 	for environment in "${XDG_CONFIG_HOME:-$HOME/.config}"/environment.d/*.conf; do
-		# shellcheck disable=SC1090
 		[ -f "$environment" ] && . "$environment"
 	done
 	set +a
