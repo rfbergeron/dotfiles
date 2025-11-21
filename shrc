@@ -11,21 +11,6 @@ elif command -v info >/dev/null 2>&1; then
 	alias info='info --vi-keys'
 fi
 
-# sloccount can't be configured with envvars so we do it here instead
-if [ -n "$XDG_CACHE_HOME" ] && command -v sloccount >/dev/null 2>&1; then
-	alias sloccount='sloccount --datadir "$XDG_CACHE_HOME"/sloccount'
-fi
-
-# same as above
-if [ -n "$XDG_CONFIG_HOME" ] && command -v yarn >/dev/null 2>&1; then
-	alias yarn='yarn --use-yarnrc "$XDG_CONFIG_HOME"/yarn/config'
-fi
-
-# as above, but the configuration file contains more changes
-if [ -n "$XDG_CACHE_HOME" ] && command -v mvn >/dev/null 2>&1; then
-	alias mvn='mvn -gs $XDG_CONFIG_HOME/maven/settings.xml'
-fi
-
 # color and conveniences
 alias ls='ls -h --color=auto'
 alias grep='grep --color=auto'

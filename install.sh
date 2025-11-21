@@ -35,7 +35,9 @@ if [ -z "${REMOVE_CLUTTER+x}" ]; then
 	if command -v tmux >/dev/null 2>&1; then
 		cp ./tmux.conf "$HOME"/.tmux.conf
 	fi
+	mkdir -p "$HOME"/.bin
 else
+	mkdir -p "$HOME"/.local/bin
 	mkdir -p "$config_dir"/readline
 	cp ./inputrc "$config_dir"/readline/
 	if command -v tmux >/dev/null 2>&1; then
@@ -54,10 +56,15 @@ else
 		mkdir -p "$config_dir"/yarn
 		# yarn needs a file to be here, even if it is empty
 		touch "$config_dir"/yarn/config
+		printf '#!/bin/sh\nexec yarn --use-yarnrc "$XDG_CONFIG_HOME"/yarn/config "$@"' >"$HOME"/.local/bin/yarn
 	fi
 	if command -v mvn >/dev/null 2>&1; then
 		mkdir -p "$config_dir"/maven
 		cp ./maven/settings.xml "$config_dir"/maven/
+		printf '#!/bin/sh\nexec mvn -gs "$XDG_CONFIG_HOME"/maven/settings.xml "$@"' >"$HOME"/.local/bin/mvn
+	fi
+	if command -v sloccount >/dev/null 2>&1; then
+		printf '#!/bin/sh\nexec sloccount --datadir "$XDG_CACHE_HOME"/sloccount "$@"' >"$HOME"/.local/bin/sloccount
 	fi
 fi
 
