@@ -37,6 +37,7 @@ vim.opt.wrap = true
 vim.opt.showbreak = "  >"
 vim.opt.foldenable = false
 vim.opt.winborder = "shadow"
+vim.opt.laststatus = 1
 -- showbreak in gutter
 vim.opt.cpoptions:append("n")
 

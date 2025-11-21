@@ -52,3 +52,7 @@ fi
 if [ -d "$config_dir"/nvim ]; then
 	cp "$config_dir"/nvim/init.lua ./nvim/
 fi
+
+if [ -f "$HOME"/.vimrc ]; then
+	cp "$HOME"/.vimrc ./vim/init.vim
+fi

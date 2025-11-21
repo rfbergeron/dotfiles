@@ -105,7 +105,7 @@ if command -v nvim >/dev/null 2>&1; then
 			git clone "$repo_url" "$full_path"
 		fi
 	done <<-EOF
-		$lsp_dir htts://github.com/hrsh7th/cm-nvim-lsp.git cmp-lsp
+		$lsp_dir https://github.com/hrsh7th/cmp-nvim-lsp.git cmp-lsp
 		$lsp_dir https://github.com/saadparwaiz1/cmp_luasnip.git cmp-luasnip
 		$lsp_dir https://github.com/VonHeikemen/lsp-zero.nvim.git lsp-zero
 		$lsp_dir https://github.com/L3MON4D3/LuaSnip.git luasnip
@@ -119,6 +119,23 @@ if command -v nvim >/dev/null 2>&1; then
 		$treesitter_dir https://github.com/nvim-treesitter/nvim-treesitter.git treesitter main
 		$treesitter_dir https://github.com/nvim-treesitter/nvim-treesitter-textobjects.git treesitter-textobjects main
 	EOF
-else
-	echo "Unable to locate neovim executable; skipping package installation."
+elif command -v vim >/dev/null 2>&1; then
+	plugin_dir="$HOME"/.vim/pack/plugins/start
+	mkdir -p "$plugin_dir" "$HOME"/.vim/undo "$HOME"/.vim/swap "$HOME"/.vim/backup
+	cp ./vim/init.vim "$HOME"/.vimrc
+	if [ ! -d "$plugin_dir"/vim-indent-guides ]; then
+		git -C "$plugin_dir" clone https://github.com/preservim/vim-indent-guides.git
+	fi
+	if [ ! -d "$plugin_dir"/vim-sleuth ]; then
+		git -C "$plugin_dir" clone https://github.com/tpope/vim-sleuth.git
+	fi
+	if [ ! -d "$plugin_dir"/undotree ]; then
+		git -C "$plugin_dir" clone https://github.com/mbbill/undotree.git
+	fi
+	if [ ! -d "$plugin_dir"/vim-sandwich ]; then
+		git -C "$plugin_dir" clone https://github.com/machakann/vim-sandwich.git
+	fi
+elif command -v nano >/dev/null 2>&1; then
+	# set nano keybinds for recent versions
+	cp ./nanorc "$HOME"/.nanorc
 fi
